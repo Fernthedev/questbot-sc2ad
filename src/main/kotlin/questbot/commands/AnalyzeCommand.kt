@@ -50,9 +50,7 @@ constructor(private val gson: Gson) : CommandHandler {
 
                             val data = result.get()
 
-                            for (version in data.versions.reversed()) {
-                                embed.addField(version, version)
-                            }
+                            embed.addField("Saber Beat", data.versions.reversed().joinToString(",    "))
 
                             createFollowupMessageBuilder.addEmbed(embed).send()
 
