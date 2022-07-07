@@ -15,3 +15,13 @@ Take a look at `PinkCuteCommand` as an example
 ## Listeners
 Currently, there is only `MessageListener`. Inherit this class, bootstrapper will find it and inject it.
 
+## Building
+You can either use the profile configured in the project for Intellij or in the terminal `./gradlew clean build`
+
+## Dev testing running
+Setup `token.txt` with the bot token and then run using the Intellij run profile or `./gradlew run
+
+## Deploying
+Deployment assumes usage of the [gradle distribution plugin](https://docs.gradle.org/current/userguide/distribution_plugin.html#distribution_plugin)
+
+In other words, using the zips in `build/distributions`

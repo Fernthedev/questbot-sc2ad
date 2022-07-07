@@ -8,7 +8,7 @@ import java.io.File
 import kotlin.system.measureTimeMillis
 
 
-fun main(args: Array<String>) {
+fun main() {
     val token = File("./token.txt").readText()
 
     val api = DiscordApiBuilder().setToken(token)
