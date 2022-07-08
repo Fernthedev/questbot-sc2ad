@@ -21,6 +21,10 @@ class TombstoneAnalyzer @Inject constructor(
     private val gson: Gson
 ) {
 
+    private val backtraceRegexWithBuildId = Regex("\\#\\d+ pc 0[0-9a-fA-F]+  [a-zA-Z-\\/\\-.0-9=]+( \\(BuildId: ([a-zA-Z0-9]+)\\))?")
+    private val buildId = Regex("( \\(BuildId: ([a-zA-Z0-9]+)\\))")
+    private val backtraceRegexWithoutBuildId = Regex("\\#\\d+ pc 0[0-9a-fA-F]+  [a-zA-Z-\\/\\-.0-9=]+(\\(BuildId: ([a-zA-Z0-9]+)\\))?")
+
     private fun getVersion(stacktrace: String): String {
         // TODO: Implement
         return "1.23.0"
@@ -67,15 +71,19 @@ class TombstoneAnalyzer @Inject constructor(
                                 if (backtraceEnd < 0) backtraceEnd = backtraceStart + 700
 
                                 backtraceEnd = min(backtraceEnd, data.stacktrace.length - 1)
+
                                 val backtrace =
                                     data.stacktrace.substring(backtraceStart, backtraceEnd).trim().trimIndent()
                                         .trimMargin()
 
+                                val cleanBacktrace = backtrace.lines()
+                                    .joinToString(separator = "\n") { it.replace(buildId, "") }
 
-                                val backtraceTrimmed = if (backtrace.length > 1800) {
-                                    backtrace.substring(0, 1800)
+
+                                val backtraceTrimmed = if (cleanBacktrace.length > 1800) {
+                                    cleanBacktrace.substring(0, 1800)
                                 } else {
-                                    backtrace
+                                    cleanBacktrace
                                 }
 
                                 messageBuilder.appendCode("cpp", backtraceTrimmed)
