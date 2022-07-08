@@ -107,7 +107,6 @@ constructor(private val gson: Gson, private val tombstoneAnalyzer: TombstoneAnal
                         createFollowupMessageBuilder.addEmbed(embed).send()
 
                     }
-                    else -> {}
                 }
             }
     }
@@ -122,7 +121,7 @@ internal data class AnalyzeResult(
     val version: String?,
     val stacktrace: String?,
     val error: String?
-) {}
+)
 
 internal data class VersionResult(
     val versions: Array<String>

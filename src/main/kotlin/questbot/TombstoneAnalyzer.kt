@@ -103,7 +103,7 @@ class TombstoneAnalyzer @Inject constructor(
                 }
             }
 
-        return future;
+        return future
     }
 
 }
