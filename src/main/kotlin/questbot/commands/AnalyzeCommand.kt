@@ -1,11 +1,10 @@
 package questbot.commands
 
-import com.github.kittinunf.fuel.gson.jsonBody
 import com.github.kittinunf.fuel.gson.responseObject
 import com.github.kittinunf.fuel.httpGet
-import com.github.kittinunf.fuel.httpPost
 import com.github.kittinunf.result.Result
 import com.google.gson.Gson
+import org.javacord.api.entity.message.MessageBuilder
 import org.javacord.api.entity.message.MessageFlag
 import org.javacord.api.entity.message.embed.EmbedBuilder
 import org.javacord.api.event.interaction.SlashCommandCreateEvent
@@ -13,14 +12,12 @@ import org.javacord.api.interaction.SlashCommand
 import org.javacord.api.interaction.SlashCommandBuilder
 import org.javacord.api.interaction.SlashCommandOption
 import org.javacord.api.interaction.SlashCommandOptionType
-import org.slf4j.Logger
+import questbot.TombstoneAnalyzer
 import questbot.api.CommandHandler
 import javax.inject.Inject
-import kotlin.math.max
-import kotlin.math.min
 
 class AnalyzeCommand @Inject
-constructor(private val gson: Gson, private val logger: Logger) : CommandHandler {
+constructor(private val gson: Gson, private val tombstoneAnalyzer: TombstoneAnalyzer) : CommandHandler {
     override fun buildCommand(): SlashCommandBuilder {
         return SlashCommand.with(
             "analyze", "Analyze tombstones",
@@ -50,9 +47,7 @@ constructor(private val gson: Gson, private val logger: Logger) : CommandHandler
         }
     }
 
-    private fun getVersion(stacktrace: String): String {
-        return "1.23.0"
-    }
+
 
     private fun analyzeTombstone(event: SlashCommandCreateEvent) {
         val slashCommandInteraction = event.slashCommandInteraction
@@ -75,65 +70,16 @@ constructor(private val gson: Gson, private val logger: Logger) : CommandHandler
 
 
         fileDataAsync.thenAccept { fileData ->
-            "https://il2cpp-analyzer.herokuapp.com/api/analyze"
-                .httpPost()
-                .jsonBody(AnalyzeRequest(
-                    version = getVersion(fileData),
-                    stacktrace = fileData
-                ), gson)
-                .header(
-                    "Accept" to "application/json")
-                .header(
-                    "Content-Type" to "application/json"
-                )
-                .allowRedirects(true)
-                .responseObject<AnalyzeResult>(gson) { request, response, result ->
-                    val createFollowupMessageBuilder = slashCommandInteraction.createFollowupMessageBuilder()
-                    when (result) {
-                        is Result.Failure -> {
-                            logger.warn("Received error ${response.statusCode} ${response.responseMessage}")
-                            logger.warn(result.error.toString())
-                            logger.warn("${request.url} : ${request.body.asString("application/json")}")
-                            createFollowupMessageBuilder.setContent("Failure in analyzing ${response.statusCode}").send()
-                        }
-                        is Result.Success -> {
-                            val data = result.value
+            val messageBuilder = MessageBuilder()
 
-                            if (!data.success || data.stacktrace == null) {
-                                logger.warn("Error analyzing ${data.error}")
-                                createFollowupMessageBuilder.setContent("Failure in analyzing: ${data.error}").send()
-                                return@responseObject
-                            }
+            tombstoneAnalyzer.analyze(file.get().fileName, fileData, messageBuilder).thenAccept {
+                val interactionMessageBuilder = slashCommandInteraction.createFollowupMessageBuilder()
 
-                            createFollowupMessageBuilder.addAttachment(
-                                data.stacktrace.encodeToByteArray(),
-                                "${file.get().fileName}_analyzed.cpp"
-                            )
+                interactionMessageBuilder.stringBuilder.append(it.messageBuilder.stringBuilder.toString())
+                interactionMessageBuilder.addAttachment(it.fileData.encodeToByteArray(), it.fileName)
 
-                            val backtraceStart = data.stacktrace.indexOf("backtrace:")
-                            if (backtraceStart > -1) {
-                                var backtraceEnd = max(data.stacktrace.indexOf("\nstack:"), backtraceStart + 700)
-                                if (backtraceEnd < 0) backtraceEnd = backtraceStart + 700
-
-                                backtraceEnd = min(backtraceEnd, data.stacktrace.length - 1)
-                                val backtrace = data.stacktrace.substring(backtraceStart, backtraceEnd).trim().trimIndent().trimMargin()
-
-
-                                val backtraceTrimmed = if (backtrace.length > 1800)  {
-                                    backtrace.substring(0, 1800)
-                                } else {
-                                    backtrace
-                                }
-
-                                createFollowupMessageBuilder.appendCode("cpp", backtraceTrimmed)
-                            }
-
-                            createFollowupMessageBuilder.send()
-
-                        }
-                        else -> {}
-                    }
-                }
+                interactionMessageBuilder.send()
+            }
         }
     }
 
