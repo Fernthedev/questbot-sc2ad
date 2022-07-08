@@ -13,6 +13,4 @@ class PinkCuteCommand : CommandHandler{
     override fun onCommandInvoke(command: SlashCommand, event: SlashCommandCreateEvent) {
         event.slashCommandInteraction.createImmediateResponder().setContent("Pink cute").respond()
     }
-
-
 }

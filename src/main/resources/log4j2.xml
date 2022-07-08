@@ -20,7 +20,10 @@ or
     </Appenders>
     <Loggers>
         <Logger name="org.reflections.Reflections" level="ERROR"/>
-        <Logger name="org.javacord.core" level="info" />
+        <Logger name="org.javacord.core" level="info">
+            <AppenderRef ref="RandomAccessFile"/>
+            <AppenderRef ref="Console"/>
+        </Logger>
         <Root level="debug" includeLocation="false">
             <AppenderRef ref="RandomAccessFile"/>
             <AppenderRef ref="Console"/>

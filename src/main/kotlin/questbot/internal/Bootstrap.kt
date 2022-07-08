@@ -38,6 +38,11 @@ class Bootstrap
             val commandBuilder: SlashCommandBuilder = commandHandler.buildCommand()
             commandBuilder.createGlobal(api).whenComplete { command, _ ->
                 api.addSlashCommandCreateListener { event ->
+                    if (command == null) {
+                        logger.info("Command is null")
+                        return@addSlashCommandCreateListener
+                    }
+
                     if (event.slashCommandInteraction.commandId == command.id) {
                         commandHandler.onCommandInvoke(command, event);
                     }
