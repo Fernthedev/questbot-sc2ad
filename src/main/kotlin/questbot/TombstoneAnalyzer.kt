@@ -21,9 +21,10 @@ class TombstoneAnalyzer @Inject constructor(
     private val gson: Gson
 ) {
 
-    private val backtraceRegexWithBuildId = Regex("\\#\\d+ pc 0[0-9a-fA-F]+  [a-zA-Z-\\/\\-.0-9=]+( \\(BuildId: ([a-zA-Z0-9]+)\\))?")
-    private val buildId = Regex("( \\(BuildId: ([a-zA-Z0-9]+)\\))")
-    private val backtraceRegexWithoutBuildId = Regex("\\#\\d+ pc 0[0-9a-fA-F]+  [a-zA-Z-\\/\\-.0-9=]+(\\(BuildId: ([a-zA-Z0-9]+)\\))?")
+    private val backtraceRegexWithBuildId = Regex("#\\d+ pc 0[\\da-fA-F]+ [a-zA-Z-/\\-.\\d=]+( \\(BuildId: ([a-zA-Z\\d]+)\\))?")
+    private val buildId = Regex("( \\(BuildId: ([a-zA-Z\\d]+)\\))")
+    private val directoryPrefix = Regex("/.+/")
+    private val backtraceRegexWithoutBuildId = Regex("#\\d+ pc 0[\\da-fA-F]+[a-zA-Z-/\\-.\\d=]+(\\(BuildId: ([a-zA-Z\\d]+)\\))?")
 
     private fun getVersion(stacktrace: String): String {
         // TODO: Implement
@@ -77,7 +78,10 @@ class TombstoneAnalyzer @Inject constructor(
                                         .trimMargin()
 
                                 val cleanBacktrace = backtrace.lines()
-                                    .joinToString(separator = "\n") { it.replace(buildId, "") }
+                                    .joinToString(separator = "\n") {
+                                        it.replace(buildId, "")
+                                        .replace(directoryPrefix, "")
+                                    }
 
 
                                 val backtraceTrimmed = if (cleanBacktrace.length > 1800) {
