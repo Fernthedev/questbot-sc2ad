@@ -59,7 +59,7 @@ class TombstoneAnalyzer @Inject constructor(
                         is Result.Success -> {
                             val data = result.value
 
-                            if (!data.success || data.stacktrace == null) {
+                            if (data.stacktrace == null) {
                                 logger.warn("Error analyzing ${data.error}")
                                 messageBuilder.setContent("Failure in analyzing: ${data.error}")
                                 return@run
@@ -124,7 +124,6 @@ internal data class AnalyzeRequest(
 )
 
 internal data class AnalyzeResult(
-    val success: Boolean,
     val version: String?,
     val stacktrace: String?,
     val error: String?
