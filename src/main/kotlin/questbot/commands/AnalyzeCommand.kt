@@ -56,30 +56,25 @@ constructor(private val gson: Gson, private val tombstoneAnalyzer: TombstoneAnal
         val file = upload.flatMap { it.getOptionAttachmentValueByName("tombstone") } // .getOptionByName()
 
         if (file.isEmpty) {
-            slashCommandInteraction.createImmediateResponder().setContent("No file attached").setFlags(MessageFlag.EPHEMERAL).respond()
+            slashCommandInteraction.createImmediateResponder().setContent("No file attached")
+                .setFlags(MessageFlag.EPHEMERAL).respond()
             return
         }
 
         slashCommandInteraction.respondLater()
 
-        val fileDataAsync = file.get().downloadAsByteArray().handle { t, u ->
-            if (u != null) throw u
+        val url = file.get().url
 
-            return@handle t.decodeToString()
-        }
+        val messageBuilder = MessageBuilder()
 
+        tombstoneAnalyzer.analyze(file.get().fileName, url, messageBuilder).thenAccept {
+            val interactionMessageBuilder = slashCommandInteraction.createFollowupMessageBuilder()
 
-        fileDataAsync.thenAccept { fileData ->
-            val messageBuilder = MessageBuilder()
+            interactionMessageBuilder.stringBuilder.append(it.messageBuilder.stringBuilder.toString())
+            interactionMessageBuilder.addAttachment(it.fileData.encodeToByteArray(), it.fileName)
 
-            tombstoneAnalyzer.analyze(file.get().fileName, fileData, messageBuilder).thenAccept {
-                val interactionMessageBuilder = slashCommandInteraction.createFollowupMessageBuilder()
+            interactionMessageBuilder.send()
 
-                interactionMessageBuilder.stringBuilder.append(it.messageBuilder.stringBuilder.toString())
-                interactionMessageBuilder.addAttachment(it.fileData.encodeToByteArray(), it.fileName)
-
-                interactionMessageBuilder.send()
-            }
         }
     }
 
@@ -112,16 +107,7 @@ constructor(private val gson: Gson, private val tombstoneAnalyzer: TombstoneAnal
     }
 }
 
-internal data class AnalyzeRequest(
-    val version: String,
-    val stacktrace: String
-)
-internal data class AnalyzeResult(
-    val success: Boolean,
-    val version: String?,
-    val stacktrace: String?,
-    val error: String?
-)
+
 
 internal data class VersionResult(
     val versions: Array<String>

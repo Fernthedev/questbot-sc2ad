@@ -20,12 +20,11 @@ class TombstoneMessage
         e.channel.sendMessage("Analyzing ${tombstones.joinToString(";") { it.fileName }}")
 
         for (tombstone in tombstones) {
-            tombstone.downloadAsByteArray().thenAccept { fileData ->
-                val message = MessageBuilder()
-                tombstoneAnalyzer.analyze(tombstone.fileName, fileData.decodeToString(), message).thenAccept {
-                    message.addAttachment(it.fileData.encodeToByteArray(), it.fileName)
-                    message.send(e.channel)
-                }
+            val url = tombstone.url
+            val message = MessageBuilder()
+            tombstoneAnalyzer.analyze(tombstone.fileName, url, message).thenAccept {
+                message.addAttachment(it.fileData.encodeToByteArray(), it.fileName)
+                message.send(e.channel)
             }
         }
     }

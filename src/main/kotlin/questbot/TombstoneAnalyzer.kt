@@ -7,8 +7,7 @@ import com.github.kittinunf.result.Result
 import com.google.gson.Gson
 import org.javacord.api.entity.message.MessageBuilder
 import org.slf4j.Logger
-import questbot.commands.AnalyzeRequest
-import questbot.commands.AnalyzeResult
+import java.net.URL
 import java.util.concurrent.CompletableFuture
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -26,19 +25,19 @@ class TombstoneAnalyzer @Inject constructor(
     private val directoryPrefix = Regex("/.+/")
     private val backtraceRegexWithoutBuildId = Regex("#\\d+ pc 0[\\da-fA-F]+[a-zA-Z-/\\-.\\d=]+(\\(BuildId: ([a-zA-Z\\d]+)\\))?")
 
-    private fun getVersion(stacktrace: String): String {
-        // TODO: Implement
-        return "1.23.0"
+    // automatically resolves the correct version from the BuildID
+    private fun getVersion(): String {
+        return "BuildID"
     }
 
-    fun analyze(fileName: String, fileData: String, messageBuilder: MessageBuilder): CompletableFuture<AnalyzeTombstoneResult> {
+    fun analyze(fileName: String, url: URL, messageBuilder: MessageBuilder): CompletableFuture<AnalyzeTombstoneResult> {
         val future = CompletableFuture<AnalyzeTombstoneResult>()
         "https://il2cpp-analyzer.herokuapp.com/api/analyze"
             .httpPost()
             .jsonBody(
                 AnalyzeRequest(
-                    version = getVersion(fileData),
-                    stacktrace = fileData
+                    version = getVersion(),
+                    url = url.toExternalForm()
                 ), gson
             )
             .header(
@@ -119,6 +118,17 @@ class TombstoneAnalyzer @Inject constructor(
     }
 
 }
+internal data class AnalyzeRequest(
+    val version: String,
+    val url: String
+)
+
+internal data class AnalyzeResult(
+    val success: Boolean,
+    val version: String?,
+    val stacktrace: String?,
+    val error: String?
+)
 
 class AnalyzeTombstoneResult(
     val messageBuilder: MessageBuilder,
