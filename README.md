@@ -26,19 +26,11 @@ Deployment assumes usage of the [gradle distribution plugin](https://docs.gradle
 
 In other words, using the zips in `build/distributions`
 
-## Deploying with Docker
+## Deploying with Docker [Hub]
 _No more Docker Hub free automatic builds 🥲_
 
-
-
-Run in the repository:
-```shell
-gradlew clean installDist build
-docker build . -t questbot-sc2ad
-```
-
-Then create a Dockerfile with the following and deploy:
+Create a Dockerfile with the following and deploy:
 ```dockerfile
-FROM questbot-sc2ad
+FROM fernthedev:questbot-sc2ad 
 COPY ./token.txt "/opt/app/bin/token.txt"
 ```
