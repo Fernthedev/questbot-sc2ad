@@ -25,3 +25,20 @@ Setup `token.txt` with the bot token and then run using the Intellij run profile
 Deployment assumes usage of the [gradle distribution plugin](https://docs.gradle.org/current/userguide/distribution_plugin.html#distribution_plugin)
 
 In other words, using the zips in `build/distributions`
+
+## Deploying with Docker
+_No more Docker Hub free automatic builds 🥲_
+
+
+
+Run in the repository:
+```shell
+gradlew clean installDist build
+docker build . -t questbot-sc2ad
+```
+
+Then create a Dockerfile with the following and deploy:
+```dockerfile
+FROM questbot-sc2ad
+COPY ./token.txt "/opt/app/bin/token.txt"
+```
