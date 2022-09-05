@@ -32,7 +32,7 @@ class TombstoneAnalyzer @Inject constructor(
 
     fun analyze(fileName: String, url: URL, messageBuilder: MessageBuilder): CompletableFuture<AnalyzeTombstoneResult> {
         val future = CompletableFuture<AnalyzeTombstoneResult>()
-        "https://il2cpp-analyzer.herokuapp.com/api/analyze"
+        "https://analyzer.questmodding.com/api/analyze"
             .httpPost()
             .jsonBody(
                 AnalyzeRequest(
