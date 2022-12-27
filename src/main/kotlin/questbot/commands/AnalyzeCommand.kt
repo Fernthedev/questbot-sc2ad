@@ -82,7 +82,7 @@ constructor(private val gson: Gson, private val tombstoneAnalyzer: TombstoneAnal
         val slashCommandInteraction = event.slashCommandInteraction
 
         slashCommandInteraction.respondLater()
-        "https://il2cpp-analyzer.herokuapp.com/api/versions"
+        "https://analyzer.questmodding.com/api/versions"
             .httpGet()
             .responseObject<VersionResult>(gson) { _, _, result ->
                 val createFollowupMessageBuilder = slashCommandInteraction.createFollowupMessageBuilder()
@@ -93,7 +93,7 @@ constructor(private val gson: Gson, private val tombstoneAnalyzer: TombstoneAnal
                     is Result.Success -> {
                         val embed = EmbedBuilder()
                         embed.setTitle("Found versions!")
-                        embed.setFooter("Version pulled from https://il2cpp-analyzer.herokuapp.com/api/versions")
+                        embed.setFooter("Version pulled from https://analyzer.questmodding.com/api/versions")
 
                         val data = result.value
 
