@@ -1,10 +1,10 @@
 package questbot.listeners
 
+import jakarta.inject.Inject
 import org.javacord.api.entity.message.MessageBuilder
 import org.javacord.api.event.message.MessageCreateEvent
 import questbot.TombstoneAnalyzer
 import questbot.api.MessageListener
-import javax.inject.Inject
 
 class TombstoneMessage
 @Inject constructor(

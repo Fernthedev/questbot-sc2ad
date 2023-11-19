@@ -31,6 +31,6 @@ _No more Docker Hub free automatic builds 🥲_
 
 Create a Dockerfile with the following and deploy:
 ```dockerfile
-FROM fernthedev:questbot-sc2ad 
+FROM fernthedev/questbot-sc2ad 
 COPY ./token.txt "/opt/app/bin/token.txt"
 ```

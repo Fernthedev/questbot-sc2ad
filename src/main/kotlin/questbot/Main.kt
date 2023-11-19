@@ -25,6 +25,4 @@ fun main() {
     }
 
     println("Took ${time}ms to finish startup")
-
-
 }

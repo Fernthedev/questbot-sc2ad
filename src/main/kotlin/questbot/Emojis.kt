@@ -1,9 +1,9 @@
 package questbot
 
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 import org.javacord.api.DiscordApi
 import org.javacord.api.entity.emoji.KnownCustomEmoji
-import javax.inject.Inject
-import javax.inject.Singleton
 
 @Singleton
 class Emojis

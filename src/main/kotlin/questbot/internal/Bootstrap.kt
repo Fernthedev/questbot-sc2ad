@@ -1,5 +1,6 @@
 package questbot.internal
 
+import jakarta.inject.Inject
 import org.javacord.api.DiscordApi
 import org.javacord.api.interaction.SlashCommandBuilder
 import org.slf4j.Logger
@@ -7,7 +8,6 @@ import questbot.api.CommandHandler
 import questbot.api.IBootstrap
 import questbot.api.MessageListener
 import java.util.concurrent.CompletableFuture
-import javax.inject.Inject
 
 class Bootstrap
 @Inject constructor(

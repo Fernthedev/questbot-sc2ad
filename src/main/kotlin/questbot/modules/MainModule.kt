@@ -14,6 +14,7 @@ class MainModule(private val api: DiscordApi) : AbstractModule() {
         bind(Reflections::class.java).toProvider(Providers.of(reflections))
 
         install(LoggerModule())
+        install(MoshiModule())
         install(HandlerModule(reflections))
         install(BootstrapModule())
     }

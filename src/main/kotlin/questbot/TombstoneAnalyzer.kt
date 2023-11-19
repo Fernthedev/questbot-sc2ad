@@ -1,23 +1,25 @@
 package questbot
 
-import com.github.kittinunf.fuel.gson.jsonBody
-import com.github.kittinunf.fuel.gson.responseObject
+import com.github.kittinunf.fuel.core.extensions.jsonBody
 import com.github.kittinunf.fuel.httpPost
+import com.github.kittinunf.fuel.moshi.responseObject
 import com.github.kittinunf.result.Result
-import com.google.gson.Gson
+import com.squareup.moshi.JsonClass
+import com.squareup.moshi.Moshi
+import com.squareup.moshi.adapter
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 import org.javacord.api.entity.message.MessageBuilder
 import org.slf4j.Logger
 import java.net.URL
 import java.util.concurrent.CompletableFuture
-import javax.inject.Inject
-import javax.inject.Singleton
 import kotlin.math.max
 import kotlin.math.min
 
 @Singleton
 class TombstoneAnalyzer @Inject constructor(
     private val logger: Logger,
-    private val gson: Gson
+    private val moshi: Moshi
 ) {
 
     private val backtraceRegexWithBuildId = Regex("#\\d+ pc 0[\\da-fA-F]+ [a-zA-Z-/\\-.\\d=]+( \\(BuildId: ([a-zA-Z\\d]+)\\))?")
@@ -30,15 +32,16 @@ class TombstoneAnalyzer @Inject constructor(
         return "BuildID"
     }
 
+    @OptIn(ExperimentalStdlibApi::class)
     fun analyze(fileName: String, url: URL, messageBuilder: MessageBuilder): CompletableFuture<AnalyzeTombstoneResult> {
         val future = CompletableFuture<AnalyzeTombstoneResult>()
         "https://analyzer.questmodding.com/api/analyze"
             .httpPost()
             .jsonBody(
-                AnalyzeRequest(
+                moshi.adapter<AnalyzeRequest>().toJson(AnalyzeRequest(
                     version = getVersion(),
                     url = url.toExternalForm()
-                ), gson
+                ))
             )
             .header(
                 "Accept" to "application/json"
@@ -47,7 +50,7 @@ class TombstoneAnalyzer @Inject constructor(
                 "Content-Type" to "application/json"
             )
             .allowRedirects(true)
-            .responseObject<AnalyzeResult>(gson) { request, response, result ->
+            .responseObject<AnalyzeResult>() { request, response, result ->
                 run {
                     when (result) {
                         is Result.Failure -> {
@@ -118,17 +121,21 @@ class TombstoneAnalyzer @Inject constructor(
     }
 
 }
+
+@JsonClass(generateAdapter = true)
 internal data class AnalyzeRequest(
     val version: String,
     val url: String
 )
 
+@JsonClass(generateAdapter = true)
 internal data class AnalyzeResult(
     val version: String?,
     val stacktrace: String?,
     val error: String?
 )
 
+@JsonClass(generateAdapter = true)
 class AnalyzeTombstoneResult(
     val messageBuilder: MessageBuilder,
     val fileName: String,

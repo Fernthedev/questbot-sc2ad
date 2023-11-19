@@ -1,9 +1,11 @@
 package questbot.commands
 
-import com.github.kittinunf.fuel.gson.responseObject
 import com.github.kittinunf.fuel.httpGet
+import com.github.kittinunf.fuel.moshi.responseObject
 import com.github.kittinunf.result.Result
-import com.google.gson.Gson
+import com.squareup.moshi.JsonClass
+import com.squareup.moshi.Moshi
+import jakarta.inject.Inject
 import org.javacord.api.entity.message.MessageBuilder
 import org.javacord.api.entity.message.MessageFlag
 import org.javacord.api.entity.message.embed.EmbedBuilder
@@ -14,10 +16,9 @@ import org.javacord.api.interaction.SlashCommandOption
 import org.javacord.api.interaction.SlashCommandOptionType
 import questbot.TombstoneAnalyzer
 import questbot.api.CommandHandler
-import javax.inject.Inject
 
 class AnalyzeCommand @Inject
-constructor(private val gson: Gson, private val tombstoneAnalyzer: TombstoneAnalyzer) : CommandHandler {
+constructor(private val moshi: Moshi, private val tombstoneAnalyzer: TombstoneAnalyzer) : CommandHandler {
     override fun buildCommand(): SlashCommandBuilder {
         return SlashCommand.with(
             "analyze", "Analyze tombstones",
@@ -53,7 +54,7 @@ constructor(private val gson: Gson, private val tombstoneAnalyzer: TombstoneAnal
         val slashCommandInteraction = event.slashCommandInteraction
 
         val upload = slashCommandInteraction.getOptionByName("upload")
-        val file = upload.flatMap { it.getOptionAttachmentValueByName("tombstone") } // .getOptionByName()
+        val file = upload.flatMap { it.getArgumentAttachmentValueByName("tombstone") } // .getOptionByName()
 
         if (file.isEmpty) {
             slashCommandInteraction.createImmediateResponder().setContent("No file attached")
@@ -84,7 +85,7 @@ constructor(private val gson: Gson, private val tombstoneAnalyzer: TombstoneAnal
         slashCommandInteraction.respondLater()
         "https://analyzer.questmodding.com/api/versions"
             .httpGet()
-            .responseObject<VersionResult>(gson) { _, _, result ->
+            .responseObject<VersionResult> { _, _, result ->
                 val createFollowupMessageBuilder = slashCommandInteraction.createFollowupMessageBuilder()
                 when (result) {
                     is Result.Failure -> {
@@ -108,7 +109,7 @@ constructor(private val gson: Gson, private val tombstoneAnalyzer: TombstoneAnal
 }
 
 
-
+@JsonClass(generateAdapter = true)
 internal data class VersionResult(
     val versions: Array<String>
 ) {
