@@ -13,6 +13,7 @@ class MainModule(private val api: DiscordApi) : AbstractModule() {
         val reflections = Reflections("questbot");
         bind(Reflections::class.java).toProvider(Providers.of(reflections))
 
+        install(ReminderModule())
         install(LoggerModule())
         install(MoshiModule())
         install(HandlerModule(reflections))

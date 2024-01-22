@@ -50,7 +50,7 @@ class TombstoneAnalyzer @Inject constructor(
                 "Content-Type" to "application/json"
             )
             .allowRedirects(true)
-            .responseObject<AnalyzeResult>() { request, response, result ->
+            .responseObject<AnalyzeResult> { request, response, result ->
                 run {
                     when (result) {
                         is Result.Failure -> {

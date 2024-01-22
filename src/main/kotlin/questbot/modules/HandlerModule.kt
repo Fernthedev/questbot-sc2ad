@@ -16,6 +16,7 @@ class HandlerModule(private val reflections: Reflections) : AbstractModule() {
         val handler: Multibinder<MessageListener> = Multibinder.newSetBinder(binder(), MessageListener::class.java)
         val commandBinder: Multibinder<CommandHandler> = Multibinder.newSetBinder(binder(), CommandHandler::class.java)
 
+        // Finds all classes in the module with inheritance
         for (clazz in reflections.getSubTypesOf(MessageListener::class.java)) {
             handler.addBinding().toType(clazz.asSubclass(MessageListener::class.java)).`in`(Scopes.SINGLETON)
         }

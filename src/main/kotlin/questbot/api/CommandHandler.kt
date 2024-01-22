@@ -1,6 +1,5 @@
 package questbot.api
 
-import org.checkerframework.framework.qual.Unused
 import org.javacord.api.event.interaction.SlashCommandCreateEvent
 import org.javacord.api.interaction.SlashCommand
 import org.javacord.api.interaction.SlashCommandBuilder

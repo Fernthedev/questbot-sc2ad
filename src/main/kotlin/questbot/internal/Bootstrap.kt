@@ -7,6 +7,7 @@ import org.slf4j.Logger
 import questbot.api.CommandHandler
 import questbot.api.IBootstrap
 import questbot.api.MessageListener
+import questbot.reminders.ReminderManager
 import java.util.concurrent.CompletableFuture
 
 class Bootstrap
@@ -14,7 +15,8 @@ class Bootstrap
     private val api: DiscordApi,
     private val messageListeners: Set<MessageListener>,
     private val commandHandlers: Set<CommandHandler>,
-    private val logger: Logger
+    private val logger: Logger,
+    private val reminderManager: ReminderManager
 ) : IBootstrap {
     override fun startup() {
         println("meow")
@@ -22,6 +24,8 @@ class Bootstrap
         logger.info("starting up")
         addMessageListeners()
         addCommandHandlers()
+        reminderManager.init()
+
         logger.info("Finished startup")
     }
 
