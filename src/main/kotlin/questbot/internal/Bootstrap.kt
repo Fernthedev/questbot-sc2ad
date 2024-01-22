@@ -2,13 +2,13 @@ package questbot.internal
 
 import jakarta.inject.Inject
 import org.javacord.api.DiscordApi
-import org.javacord.api.interaction.SlashCommandBuilder
 import org.slf4j.Logger
 import questbot.api.CommandHandler
 import questbot.api.IBootstrap
 import questbot.api.MessageListener
 import questbot.reminders.ReminderManager
 import java.util.concurrent.CompletableFuture
+
 
 class Bootstrap
 @Inject constructor(
@@ -35,24 +35,34 @@ class Bootstrap
 
     private fun addCommandHandlers() {
         // TODO: Use hashmap
-        for (commandHandler in commandHandlers) {
+
+        val builders = commandHandlers.associateWith { commandHandler ->
             logger.info("Registering command class ${commandHandler.javaClass.simpleName}")
 
 
-            val commandBuilder: SlashCommandBuilder = commandHandler.buildCommand()
-            commandBuilder.createGlobal(api).whenComplete { command, _ ->
-                api.addSlashCommandCreateListener { event ->
-                    if (command == null) {
-                        logger.info("Command is null")
-                        return@addSlashCommandCreateListener
-                    }
+            commandHandler.buildCommand()
+        }
 
-                    if (event.slashCommandInteraction.commandId == command.id) {
-                        commandHandler.onCommandInvoke(command, event);
-                    }
+        api.bulkOverwriteGlobalApplicationCommands(builders.values.toSet()).thenApply { commands ->
+            api.addSlashCommandCreateListener { event ->
+                val invokedCommandName = event.slashCommandInteraction.commandName
+
+                val commandHandler = commandHandlers.find { it.name == invokedCommandName }
+                val command = commands.find { it.name == invokedCommandName }
+                if (command == null) {
+                    logger.info("Command is null")
+                    return@addSlashCommandCreateListener
                 }
-            }
+                if (commandHandler == null) {
+                    logger.info("Command is null")
+                    return@addSlashCommandCreateListener
+                }
 
+
+
+                commandHandler.onCommandInvoke(command, event);
+
+            }
         }
     }
 

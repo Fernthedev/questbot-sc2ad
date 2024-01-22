@@ -13,9 +13,12 @@ import java.util.*
 
 class ReminderCommand @Inject
 constructor(private val reminderManager: ReminderManager) : CommandHandler {
+
+    override val name: String = "reminder"
+
     override fun buildCommand(): SlashCommandBuilder {
         return SlashCommand.with(
-            "reminder", "Add reminder",
+            name, "Add reminder",
             arrayListOf(
                 SlashCommandOption.create(
                     SlashCommandOptionType.SUB_COMMAND,
@@ -57,7 +60,7 @@ constructor(private val reminderManager: ReminderManager) : CommandHandler {
         )
     }
 
-    override fun onCommandInvoke(command: SlashCommand, event: SlashCommandCreateEvent) {
+    override fun onCommandInvoke(command: ApplicationCommand, event: SlashCommandCreateEvent) {
         val interaction = event.slashCommandInteraction
         val list = interaction.getOptionByName("list")
         val add = interaction.getOptionByName("add")

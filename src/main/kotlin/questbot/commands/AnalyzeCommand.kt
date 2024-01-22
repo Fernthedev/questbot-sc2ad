@@ -10,18 +10,18 @@ import org.javacord.api.entity.message.MessageBuilder
 import org.javacord.api.entity.message.MessageFlag
 import org.javacord.api.entity.message.embed.EmbedBuilder
 import org.javacord.api.event.interaction.SlashCommandCreateEvent
-import org.javacord.api.interaction.SlashCommand
-import org.javacord.api.interaction.SlashCommandBuilder
-import org.javacord.api.interaction.SlashCommandOption
-import org.javacord.api.interaction.SlashCommandOptionType
+import org.javacord.api.interaction.*
 import questbot.TombstoneAnalyzer
 import questbot.api.CommandHandler
 
 class AnalyzeCommand @Inject
 constructor(private val moshi: Moshi, private val tombstoneAnalyzer: TombstoneAnalyzer) : CommandHandler {
+
+    override val name: String = "analyze"
+
     override fun buildCommand(): SlashCommandBuilder {
         return SlashCommand.with(
-            "analyze", "Analyze tombstones",
+            name, "Analyze tombstones",
             arrayListOf(
                 SlashCommandOption.create(
                     SlashCommandOptionType.SUB_COMMAND,
@@ -39,7 +39,7 @@ constructor(private val moshi: Moshi, private val tombstoneAnalyzer: TombstoneAn
         )
     }
 
-    override fun onCommandInvoke(command: SlashCommand, event: SlashCommandCreateEvent) {
+    override fun onCommandInvoke(command: ApplicationCommand, event: SlashCommandCreateEvent) {
         val interaction = event.slashCommandInteraction
         val versions = interaction.getOptionByName("versions")
         return when {
