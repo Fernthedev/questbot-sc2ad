@@ -3,10 +3,7 @@ package questbot.commands
 import jakarta.inject.Inject
 import org.javacord.api.entity.message.MessageFlag
 import org.javacord.api.event.interaction.SlashCommandCreateEvent
-import org.javacord.api.interaction.SlashCommand
-import org.javacord.api.interaction.SlashCommandBuilder
-import org.javacord.api.interaction.SlashCommandOption
-import org.javacord.api.interaction.SlashCommandOptionType
+import org.javacord.api.interaction.*
 import questbot.api.CommandHandler
 import questbot.reminders.ReminderManager
 import java.time.Duration
@@ -29,16 +26,15 @@ constructor(private val reminderManager: ReminderManager) : CommandHandler {
                 SlashCommandOption.createWithOptions(
                     SlashCommandOptionType.SUB_COMMAND, "add", "Add a reminder",
                     arrayListOf(
-                        SlashCommandOption.createWithOptions(
+                        SlashCommandOption.createWithChoices(
                             SlashCommandOptionType.STRING,
                             "amountType",
                             "Type of time",
+                            true,
                             ChronoUnit.entries.map {
-                                SlashCommandOption.createStringOption(
+                                SlashCommandOptionChoice.create(
                                     it.toString(),
-                                    "",
-                                    true,
-                                    true
+                                    it.toString()
                                 )
                             }
                         ),
@@ -95,7 +91,7 @@ constructor(private val reminderManager: ReminderManager) : CommandHandler {
 
         try {
             val msg = add.flatMap { it.getArgumentStringValueByName("message") }
-            val amount = add.flatMap { it.getArgumentLongValueByName("message") }
+            val amount = add.flatMap { it.getArgumentLongValueByName("amount") }
             val type =
                 add.flatMap { it.getArgumentStringValueByName("amountType") }.map { ChronoUnit.valueOf(it.uppercase()) }
 
