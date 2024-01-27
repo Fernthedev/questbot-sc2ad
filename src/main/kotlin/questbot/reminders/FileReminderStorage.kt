@@ -10,8 +10,7 @@ import java.io.File
 import java.nio.file.Path
 import java.util.*
 
-class FileReminderStorage @Inject
-constructor(
+class FileReminderStorage @Inject constructor(
     private val moshi: Moshi
 ) : IReminderStorage {
 
@@ -35,12 +34,12 @@ constructor(
             return mapOf()
         }
 
-        return folder
-            .listFiles()!!
-            .mapNotNull { file ->
-                moshi.adapter<Reminder>().fromJson(file.source().buffer())
-            }
-            .associateBy { it.uuid }.toMap()
+        return folder.listFiles()!!.mapNotNull { file ->
+            // close automatically
+                file.source().buffer().use { buffer ->
+                    moshi.adapter<Reminder>().fromJson(buffer)
+                }
+            }.associateBy { it.uuid }.toMap()
     }
 
     @OptIn(ExperimentalStdlibApi::class)
@@ -51,13 +50,16 @@ constructor(
         file.createNewFile()
 
         // write json
-        moshi.adapter<Reminder>().toJson(file.sink(false).buffer(), reminder)
+        // close automatically
+        file.sink(false).buffer().use { buffer ->
+            moshi.adapter<Reminder>().toJson(buffer, reminder)
+        }
     }
 
     override fun removeReminder(uuid: UUID) {
         val file = File(baseDirectory.toFile(), "${uuid}.json")
         if (!file.exists()) return
 
-        require (file.delete()) {"Unable to delete file $file"}
+        require(file.delete()) { "Unable to delete file $file" }
     }
 }
