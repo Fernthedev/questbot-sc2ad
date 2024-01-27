@@ -46,7 +46,7 @@ class ReminderManager
         return reminders.filter { it.value.userId == user.id }
     }
 
-    fun addReminder(user: User, message: String, delay: Duration) {
+    fun addReminder(user: User, message: String, delay: Duration): Reminder {
         // TODO: Reminder permission check?
 
         require(!delay.isNegative) { "Delay $delay is negative!" }
@@ -63,6 +63,7 @@ class ReminderManager
             notifyUser(user, reminder)
         }, delay.seconds, TimeUnit.SECONDS)
 
+        return reminder
     }
 
     fun removeReminder(user: User?, uuid: UUID) {

@@ -1,7 +1,6 @@
 package questbot.commands
 
 import jakarta.inject.Inject
-import org.javacord.api.entity.message.MessageFlag
 import org.javacord.api.event.interaction.SlashCommandCreateEvent
 import org.javacord.api.interaction.*
 import questbot.api.CommandHandler
@@ -11,48 +10,38 @@ import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 import java.util.*
 
-class ReminderCommand @Inject
-constructor(private val reminderManager: ReminderManager) : CommandHandler {
+class ReminderCommand @Inject constructor(private val reminderManager: ReminderManager) : CommandHandler {
 
     override val name: String = "reminder"
 
     override fun buildCommand(): SlashCommandBuilder {
         return SlashCommand.with(
-            name, "Add reminder",
-            arrayListOf(
+            name, "Add reminder", arrayListOf(
                 SlashCommandOption.create(
-                    SlashCommandOptionType.SUB_COMMAND,
-                    "list",
-                    "List reminders",
-                    false
+                    SlashCommandOptionType.SUB_COMMAND, "list", "List reminders", false
                 ),
                 SlashCommandOption.createWithOptions(
-                    SlashCommandOptionType.SUB_COMMAND, "add", "Add a reminder",
+                    SlashCommandOptionType.SUB_COMMAND,
+                    "add",
+                    "Add a reminder",
                     arrayListOf(
-                        SlashCommandOption.createWithChoices(
-                            SlashCommandOptionType.STRING,
+                        SlashCommandOption.createWithChoices(SlashCommandOptionType.STRING,
                             "amountType",
                             "Type of time",
                             true,
                             ChronoUnit.entries.map {
                                 SlashCommandOptionChoice.create(
-                                    it.toString(),
-                                    it.toString()
+                                    it.toString(), it.toString()
                                 )
-                            }
-                        ),
+                            }),
                         SlashCommandOption.create(SlashCommandOptionType.LONG, "amount", "Amount of time", true),
                         SlashCommandOption.create(SlashCommandOptionType.STRING, "message", "Message", true),
                     )
                 ),
                 SlashCommandOption.createWithOptions(
-                    SlashCommandOptionType.SUB_COMMAND, "remove", "Remove a reminder",
-                    arrayListOf(
+                    SlashCommandOptionType.SUB_COMMAND, "remove", "Remove a reminder", arrayListOf(
                         SlashCommandOption.create(
-                            SlashCommandOptionType.STRING,
-                            "uuid",
-                            "UUID of reminder",
-                            true
+                            SlashCommandOptionType.STRING, "uuid", "UUID of reminder", true
                         ),
                     )
                 )
@@ -80,47 +69,47 @@ constructor(private val reminderManager: ReminderManager) : CommandHandler {
             "${it.key}  -> ${it.value.message} (${it.value.time.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)}) "
         }.joinToString("\n")
 
-        slashCommandInteraction.createFollowupMessageBuilder()
-            .setContent(content)
-            .send()
+        slashCommandInteraction.createImmediateResponder().setContent(content).respond()
     }
 
     private fun addReminder(event: SlashCommandCreateEvent) {
         val slashCommandInteraction = event.slashCommandInteraction
 
-        val messageBuilder = slashCommandInteraction.createFollowupMessageBuilder()
+        val messageBuilder = slashCommandInteraction.createImmediateResponder()
 
         val add = slashCommandInteraction.getOptionByName("add")
 
         try {
-            val msg = add.flatMap { it.getArgumentStringValueByName("message") }
-            val amount = add.flatMap { it.getArgumentLongValueByName("amount") }
+            val msg = add.flatMap { it.getArgumentStringValueByName("message") }.get()
+            val amount = add.flatMap { it.getArgumentLongValueByName("amount") }.get()
             val type =
                 add.flatMap { it.getArgumentStringValueByName("amountType") }.map { ChronoUnit.valueOf(it.uppercase()) }
+                    .get()
 
-            reminderManager.addReminder(slashCommandInteraction.user, msg.get(), Duration.of(amount.get(), type.get()))
+            val reminder = reminderManager.addReminder(slashCommandInteraction.user, msg, Duration.of(amount, type))
+            messageBuilder.setContent("Created reminder $msg for ${reminder.time.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)}")
+            messageBuilder.respond()
         } catch (e: Exception) {
             messageBuilder.setContent("Suffered error: ${e.message}")
-            messageBuilder.send()
+            messageBuilder.respond()
         }
     }
 
     private fun removeReminder(event: SlashCommandCreateEvent) {
         val slashCommandInteraction = event.slashCommandInteraction
 
-        val messageBuilder = slashCommandInteraction.createFollowupMessageBuilder()
-        messageBuilder.setFlags(MessageFlag.LOADING)
-        messageBuilder.send()
+        val messageBuilder = slashCommandInteraction.createImmediateResponder()
 
         val upload = slashCommandInteraction.getOptionByName("remove")
-        val uuid = upload.flatMap { it.getArgumentStringValueByName("uuid") }
+        val uuid = upload.flatMap { it.getArgumentStringValueByName("uuid") }.get()
 
         try {
-            reminderManager.removeReminder(slashCommandInteraction.user, UUID.fromString(uuid.get()))
+            reminderManager.removeReminder(slashCommandInteraction.user, UUID.fromString(uuid))
+            messageBuilder.setContent("Removed reminder $uuid")
+            messageBuilder.respond()
         } catch (e: Exception) {
-            messageBuilder.setFlags()
             messageBuilder.setContent("Suffered error: ${e.message}")
-            messageBuilder.send()
+            messageBuilder.respond()
         }
     }
 }

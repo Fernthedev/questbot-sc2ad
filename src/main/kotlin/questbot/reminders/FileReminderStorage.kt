@@ -47,18 +47,17 @@ constructor(
     override fun addReminder(reminder: Reminder) {
         makeFolderIfNeeded()
 
-        val file = File(baseDirectory.toFile(), reminder.uuid.toString())
+        val file = File(baseDirectory.toFile(), "${reminder.uuid}.json")
         file.createNewFile()
 
         // write json
         moshi.adapter<Reminder>().toJson(file.sink(false).buffer(), reminder)
-
     }
 
     override fun removeReminder(uuid: UUID) {
-        val file = File(baseDirectory.toFile(), uuid.toString())
+        val file = File(baseDirectory.toFile(), "${uuid}.json")
         if (!file.exists()) return
 
-        require (file.delete()) {"Unable to delete file $file"};
+        require (file.delete()) {"Unable to delete file $file"}
     }
 }
