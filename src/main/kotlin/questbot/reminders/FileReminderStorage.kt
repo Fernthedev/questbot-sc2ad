@@ -15,11 +15,27 @@ constructor(
     private val moshi: Moshi
 ) : IReminderStorage {
 
-    private val baseDirectory = Path.of("").toAbsolutePath()
+    private val baseDirectory = Path.of("", "reminders").toAbsolutePath()
+
+    private fun makeFolderIfNeeded() {
+        val folder = baseDirectory.toFile()
+
+        if (folder.exists() && folder.isDirectory) {
+            return
+        }
+        folder.mkdirs()
+    }
 
     @OptIn(ExperimentalStdlibApi::class)
     override fun loadReminders(): Map<UUID, Reminder> {
-        return baseDirectory.toFile()
+        // Dir doesn't exist
+        val folder = baseDirectory.toFile()
+
+        if (!folder.exists()) {
+            return mapOf()
+        }
+
+        return folder
             .listFiles()!!
             .mapNotNull { file ->
                 moshi.adapter<Reminder>().fromJson(file.source().buffer())
@@ -29,6 +45,8 @@ constructor(
 
     @OptIn(ExperimentalStdlibApi::class)
     override fun addReminder(reminder: Reminder) {
+        makeFolderIfNeeded()
+
         val file = File(baseDirectory.toFile(), reminder.uuid.toString())
         file.createNewFile()
 
