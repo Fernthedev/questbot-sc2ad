@@ -1,0 +1,8 @@
+version: "3.8"
+services:
+  main:
+    image: fernthedev/questbot-sc2ad:latest
+    container_name: questbot_sc2ad
+    volumes:
+      - ./bot-data/reminders:/opt/app/bin/reminders
+      - ./token.txt:/opt/app/bin/token.txt

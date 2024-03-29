@@ -1,0 +1,8 @@
+version: "3.8"
+services:
+  main:
+    build: .
+    container_name: questbot_sc2ad
+    volumes:
+      - ./bot-data:/opt/app
+      - ./token.txt:/opt/app/token.txt

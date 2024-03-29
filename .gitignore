@@ -1,5 +1,8 @@
 *.log
 token.txt
+./bot-data
+
+reminders/
 
 .gradle
 build/
