@@ -4,5 +4,5 @@ services:
     build: .
     container_name: questbot_sc2ad
     volumes:
-      - ./bot-data:/opt/app
-      - ./token.txt:/opt/app/token.txt
+      - ./bot-data/reminders:/opt/app/bin/reminders
+      - ./token.txt:/opt/app/bin/token.txt
