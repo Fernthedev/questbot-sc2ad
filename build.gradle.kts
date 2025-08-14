@@ -12,6 +12,8 @@ version = "1.0.0"
 
 repositories {
     mavenCentral()
+    maven( "https://jitpack.io") {  } // For com.github.walkyst.JAADec-fork:jaadec-ext-aac & ibxm-fork:com.github.walkyst:ibxm-fork
+
 }
 
 dependencies {
@@ -27,6 +29,7 @@ dependencies {
     implementation("org.reflections:reflections:0.10.2")
 
     implementation("org.javacord:javacord:3.8.0")
+    implementation("dev.arbjerg:lavaplayer:2.2.4")
 
     runtimeOnly("org.apache.logging.log4j:log4j-core:2.21.1")
     runtimeOnly("org.apache.logging.log4j:log4j-api:2.21.1")
